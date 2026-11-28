@@ -49,7 +49,8 @@ const subtitleLocales = {
 	Chinese: 'zh-Hans',
 	TraditionalChinese: 'zh-Hant',
 	Japanese: 'ja',
-	Korean: 'ko'
+	Korean: 'ko',
+	Thai: 'th'
 };
 let isVoicelinePlaying = false;
 
@@ -81,7 +82,8 @@ const AUDIO_DETAIL = [
             Korean: [
                 "여기의 공공질서는 꽤나 나쁘죠.",
                 "만약 한 사람이 사라진다면 아무도 알아차리지 않을 것입니다."
-            ]
+            ],
+            Thai: ["เธอก็รู้ใช่ไหม? แถวนี้ไม่ค่อยปลอดภัยเท่าไหร่","ถ้ามีคนหายไปแค่คนเดียว คงไม่มีใครสังเกตหรอก"]
         }
     },
     {
@@ -100,7 +102,8 @@ const AUDIO_DETAIL = [
             ],
             Korean: [
                 "넌 너무 순진해 나무를 보고 숲을 놓치고 있어"
-            ]
+            ],
+            Thai: ["คุณครูยังคิดไม่รอบคอบเลยนะ รู้เรื่องหนึ่ง แต่กลับไม่รู้อีกเรื่อง"]
         }
     },
     {
@@ -119,7 +122,8 @@ const AUDIO_DETAIL = [
             ],
             Korean: [
                 "네가 나를 도울수록 더 나은 체스 조각이 될 거야"
-            ]
+            ],
+            Thai: ["ยิ่งคุณครูพยายามช่วยฉันมากเท่าไหร่... ก็ยิ่งเป็นหมากที่มีประโยชน์กับฉันมากเท่านั้น"]
         }
     },
     {
@@ -138,7 +142,8 @@ const AUDIO_DETAIL = [
             ],
             Korean: [
                 "그리고 인간의 본성은 무엇인가를 갈망하는 것이 더 어렵다는 것입니다."
-            ]
+            ],
+            Thai: ["แล้วก็—ยิ่งเป็นแบบนั้นมากเท่าไหร่ ก็ยิ่งอยากได้ไว้ในมือ นั่นแหละธรรมชาติของมนุษย์"]
         }
     },
     {
@@ -162,7 +167,8 @@ const AUDIO_DETAIL = [
             Korean: [
                 "내 진짜 본성을 알고 싶다고 했지?",
                 "지금 돌아가고 싶다고 해도 이미 너무 늦었어"
-            ]
+            ],
+            Thai: ["คุณครูบอกว่าอยากรู้ตัวตนที่แท้จริงของฉันไม่ใช่เหรอ...? แล้วคิดว่ายังไงล่ะ?","ถึงจะบอกว่าอยากถอยกลับตอนนี้—ก็สายไปแล้วล่ะ"]
         }
     },
     {
@@ -186,7 +192,8 @@ const AUDIO_DETAIL = [
             Korean: [
                 "서프라~이즈!",
                 "꽤 설득력 있는 것 같네요. 너무 무서워하지 마세요. 그냥 농담이었죠."
-            ]
+            ],
+            Thai: ["...เซอร์ไพรส์!","ดูสมจริงใช่ไหมล่ะ? อย่าทำหน้าตกใจขนาดนั้นสิ ฉันแค่ล้อเล่นเอง"]
         }
     }
 ];
@@ -310,7 +317,7 @@ function playVoiceline() {
 			track.play().catch(finish);
 
 			if (dialogBox) {
-				textbox.textContent = dialog[window.selectedLanguage][index];
+				textbox.textContent = getSubtitleText(dialog, window.selectedLanguage, index);
 				textbox.style.opacity = 1;
 			}
 		},
@@ -485,6 +492,16 @@ function setMouse(event) {
 	return { x: ax - canvas.width * positionX, y: ay - canvas.height * positionY };
 }
 
+function getSubtitleText(dialog, language, index) {
+	let text = dialog?.[language]?.[index];
+	if (text == null && language === 'Thai') {
+		language = 'English';
+		text = dialog?.[language]?.[index];
+	}
+	textbox.lang = subtitleLocales[language];
+	return text ?? "";
+}
+
 function updateSubtitleLanguage() {
 	let language = subtitleLanguagePreference;
 	if (language === 'auto') {
@@ -498,6 +515,8 @@ function updateSubtitleLanguage() {
 			language = 'Japanese';
 		} else if (primary === 'ko' || primary === 'korean' || primary === 'koreana') {
 			language = 'Korean';
+		} else if (primary === 'th' || primary === 'thai') {
+			language = 'Thai';
 		} else {
 			language = 'English';
 		}
@@ -507,7 +526,7 @@ function updateSubtitleLanguage() {
 	window.selectedLanguage = language;
 	textbox.lang = subtitleLocales[language];
 	const clip = currentTracks.at(-1);
-	if (dialogBox && clip) textbox.textContent = clip.dialog[language][clip.index];
+	if (dialogBox && clip) textbox.textContent = getSubtitleText(clip.dialog, language, clip.index);
 }
 
 function init() {
